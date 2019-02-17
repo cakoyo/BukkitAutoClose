@@ -2,6 +2,7 @@ package moe.kira.autoclose;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
@@ -18,6 +19,10 @@ public class AutoCloses implements Listener {
         return singleton;
     }
     
+    private final Collection<Map<Player, ?>> autoCloseableInstanceKeyedMaps = Lists.newArrayList();
+    private final Collection<Map<String, ?>> autoCloseableNameKeyedMaps = Lists.newArrayList();
+    private final Collection<Map<UUID, ?>> autoCloseableUniqueIdKeyedMaps = Lists.newArrayList();
+    
     public static <V> Map<Player, V> asInstance(Map<Player, V> instanceKeyedMap) {
         getInstance().autoCloseableInstanceKeyedMaps.add(instanceKeyedMap);
         return instanceKeyedMap;
@@ -33,23 +38,37 @@ public class AutoCloses implements Listener {
         return uniqueIdKeyedMap;
     }
     
-    private final Collection<Map<Player, ?>> autoCloseableInstanceKeyedMaps = Lists.newArrayList();
-    private final Collection<Map<String, ?>> autoCloseableNameKeyedMaps = Lists.newArrayList();
-    private final Collection<Map<UUID, ?>> autoCloseableUniqueIdKeyedMaps = Lists.newArrayList();
+    public static <V> Set<Player> asInstance(Set<Player> instanceKeyedSet) {
+        getInstance().autoCloseableInstanceKeyedSets.add(instanceKeyedSet);
+        return instanceKeyedSet;
+    }
+    
+    public static <V> Set<String> asName(Set<String> nameKeyedSet) {
+        getInstance().autoCloseableNameKeyedSets.add(nameKeyedSet);
+        return nameKeyedSet;
+    }
+    
+    public static <V> Set<UUID> asUniqueId(Set<UUID> uniqueIdKeyedSet) {
+        getInstance().autoCloseableUniqueIdKeyedSets.add(uniqueIdKeyedSet);
+        return uniqueIdKeyedSet;
+    }
+    
+    private final Collection<Set<Player>> autoCloseableInstanceKeyedSets = Lists.newArrayList();
+    private final Collection<Set<String>> autoCloseableNameKeyedSets = Lists.newArrayList();
+    private final Collection<Set<UUID>> autoCloseableUniqueIdKeyedSets = Lists.newArrayList();
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player playerInstance = event.getPlayer();
-        
-        for (Map<Player, ?> instanceKeyedMap : autoCloseableInstanceKeyedMaps)
-            instanceKeyedMap.remove(playerInstance);
+        autoCloseableInstanceKeyedMaps.forEach(c -> c.remove(playerInstance));
+        autoCloseableInstanceKeyedSets.forEach(c -> c.remove(playerInstance));
         
         String playerName = playerInstance.getName();
-        for (Map<String, ?> nameKeyedMap : autoCloseableNameKeyedMaps)
-            nameKeyedMap.remove(playerName);
+        autoCloseableNameKeyedMaps.forEach(c -> c.remove(playerName));
+        autoCloseableNameKeyedSets.forEach(c -> c.remove(playerName));
         
         UUID uniqueId = playerInstance.getUniqueId();
-        for (Map<UUID, ?> uniqueIdKeyedMap : autoCloseableUniqueIdKeyedMaps)
-            uniqueIdKeyedMap.remove(uniqueId);
+        autoCloseableUniqueIdKeyedMaps.forEach(c -> c.remove(uniqueId));
+        autoCloseableUniqueIdKeyedSets.forEach(c -> c.remove(uniqueId));
     }
 }
