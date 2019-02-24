@@ -20,6 +20,6 @@ public class CollectionWithPlayerConsumer<T> {
     }
     
     public static <T> CollectionWithPlayerConsumer<T> of(T collection, PlayerConsumer... consumer) {
-        return new CollectionWithPlayerConsumer<T>(collection, consumer == null ? null : consumer[0]);
+        return new CollectionWithPlayerConsumer<T>(collection, consumer.length == 0 ? null : consumer[0]);
     }
 }
